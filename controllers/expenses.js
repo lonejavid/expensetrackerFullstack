@@ -57,10 +57,11 @@ exports.login=async(req,res)=>{
 }
 
 exports.deleteExpense=async(req,res)=>{
-    const id=req.body.id;
+    var id=Object.keys(req.body);
+    var id=id[0];
     console.log("the user id to be deleted",id)
     model.Expenses.destroy({where:{
-        id:req.body.id,
+        id:id,
         UserEmail:req.user.email
     }}).then((rows)=>{
         if(rows==1)
@@ -151,6 +152,7 @@ exports.leadersBoard=async(req,res)=>{
 exports.addExpense=async(req,res)=>{
 
     const data=req.body;
+    console.log("the data received is ",data)
     const email=req.user.email
     data.UserEmail=req.user.email
     // console.log(data)

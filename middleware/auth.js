@@ -7,7 +7,7 @@ const authenticate = async (req, res, next) => {
         const token = req.headers.authentication;  // Correct way to access headers
         const user = jwt.verify(token, '786bismullah745javs234kop0988322bz');
         model.User.findByPk(user.email).then(use => {
-           // console.log(use)
+            console.log("checking for mail",use)
             req.user = use;
             next();
         });

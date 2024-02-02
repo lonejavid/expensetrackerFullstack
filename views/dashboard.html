@@ -4,7 +4,7 @@
     <style>
         body {
             font-family: sans-serif;
-            background-color: hsl(71, 45%, 48%);
+            background-color: hsl(210, 24%, 92%);
             margin: 0;
             padding: 0;
             display: flex;
@@ -64,17 +64,13 @@
             background-color: #fff;
 
         }
-        .user-expenses th, .user-expenses td {
-            border: 1px solid #333;
-            padding: 8px;
-            text-align: left;
-        }
+      
         .expenses-table{
             margin-top: 40px;
             margin-bottom: 40px;
             border-radius: 10px;
             box-shadow: 10px;
-            margin-left: 70px;
+            margin-left: 40px;
             background-color: #fff;
         }
         .leadersDiv{
@@ -86,6 +82,28 @@
             background-color: #fff;
             width: fit-content;
         }
+        th{
+            border-radius: 0px;
+            background-color: hsl(167, 75%, 48%);
+            border: 1px solid #333;
+            padding: 4px;
+            text-align: left;
+        }
+        .checkbox-options{
+            display: flex;
+            gap: 10px;
+        }
+        .expenses-form{
+            display: flex;
+            margin-top: 0%;
+            flex-direction: column;
+            align-items: center;
+            width: 250px;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
     </style>
          <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
          <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
@@ -94,17 +112,28 @@
     
     <div class="form-container">
         <button type="input" id="rzp-primum">Go Primium</button>
-        <div id="msg"></div>
+        <div id="msg">
+            <p id="msg1"></p>
+            <button onclick="download()" id="downloadexpense"  style="margin-bottom: 5px;">Download File</button>
+        </div>
         <div id="leaderBtn">
            
         </div>
        
-        <form id="expenses-form">
+        <form class="expenses-form" id="expenses-form">
             <h1>Add Expenses</h1>
+            <div class="checkbox-options">
+                <label>
+                    <input type="checkbox" name="income" value="1" id="income"> Income 
+                </label>
+                <label>
+                    <input type="checkbox" name="Expense" value="2" id="expense"> Expense
+                </label>
+            </div>
             <label for="amount">Amount</label>
-            <input type="number" class="amount-input" id="amount">
+                     <input type="number" class="amount-input" id="amount">
             <label for="description">Description</label>
-            <input type="text" class="description-input" id="description">
+                     <input type="text" class="description-input" id="description">
             <label for="category">Category</label>
             <select id="category">
                 <option>Fuel</option>
@@ -115,12 +144,14 @@
         </form>
     </div>
     <div class="expenses-table">
-        <h2 style="text-align: center; margin-top: 50px;">Added Expenses</h2>
-        <table  class="user-expenses" cell-spacing="5px" cell-padding="3px" id="tb">
+        <h2 style="text-align: center; margin-top: 50px;">Day To Day Expenses</h2>
+        <table  class="user-expenses" id="tb">
             <tr>
-                <th>Amount</th>
+                <th>Date</th>
                 <th>Description</th>
                 <th>Category</th>
+                <th>Income</th>
+                <th>Expense</th>
             </tr>
         </table>
      </div>
@@ -129,6 +160,7 @@
     </div>
     <div id="leadersBoard" class="leadersDiv">
         <h3>Leaders Board</h3>
+        <button onclick="download()" id="downloadexpense">Download File</button>
         <ul id="list"></ul>
     </div>
         

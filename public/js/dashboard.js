@@ -10,7 +10,7 @@ function parseJwt (token) {
 
 function primiumUser(){
     document.getElementById('rzp-primum').style.visibility="hidden"
-    document.getElementById('msg').innerHTML="you are a Primium user";
+    document.getElementById('msg1').innerHTML="you are a Primium user";
     leadersBoard();
 }
 function leadersBoard(){
@@ -51,11 +51,29 @@ window.onload=()=>{
     }
     axios.get('http://localhost:3000/getData',{headers:{"Authentication":token}}).then(result=>{
         const reords=result.data;
-        console.log("tessst",reords)
+       
         reords.forEach(rec=>{
-            const row=Object.values(rec);
-            const values=row.slice(0,4)
-            showData(values)
+            const { id,createdAt, description, category, income, expense } = rec;
+            let formattedCreatedAt;
+            if (createdAt instanceof Date) {
+                formattedCreatedAt = createdAt.toISOString().slice(0, 10);
+            } else {
+                formattedCreatedAt = new Date(createdAt).toISOString().slice(0, 10);
+            }
+            
+            const dataValues = {
+                id:id,
+                createdAt: formattedCreatedAt,
+                description,
+                category,
+                income,
+                expense
+            };
+            
+            const values = Object.values(dataValues);
+            showData(values);
+             
+
         })
     }).catch(error=>{
         console.log("error in loading the data",error)
@@ -66,24 +84,51 @@ myform.addEventListener('submit',(e)=>{
     e.preventDefault();
     const amount=document.getElementById('amount').value;
     const description=document.getElementById('description').value
-    const  category=document.getElementById('category').value
-    const data={amount:amount,description:description,category:category};
+    const  category=document.getElementById('category').value;
+    const incomecheckbox=document.getElementById('income');
+    const expensecheckbox=document.getElementById('expense');
+    const data={
+        amount:amount,
+        description:description,
+        category:category,
+        income: incomecheckbox.checked ? amount : null,
+        expense:expensecheckbox.checked ?amount : null
+    };
     const token=localStorage.getItem('token');
-    console.log("this is toke n which i got ",token,"data=",data)
+    console.log("data=",data)
     axios.post('http://localhost:3000/addExpense',data,{headers: {"Authentication": token }}).then(result=>{
     console.log("leaders is ",result.data.expense)   
-    const { id,amount, description, category } = result.data.expense;
-        const dataValues={ id, amount, description, category };
-        const values=Object.values(dataValues);
-        console.log("received data after added",values)
-        showData(values); 
+    const { id,createdAt, description, category, income, expense } = result.data.expense;
+
+    let formattedCreatedAt;
+    if (createdAt instanceof Date) {
+        formattedCreatedAt = createdAt.toISOString().slice(0, 10);
+    } else {
+        formattedCreatedAt = new Date(createdAt).toISOString().slice(0, 10);
+    }
+    
+    const dataValues = {
+        id:id,
+        createdAt: formattedCreatedAt,
+        description,
+        category,
+        income,
+        expense
+    };
+    
+    const values = Object.values(dataValues);
+    console.log("Received data after added", values);
+    showData(values);
+     
     }).catch(err=>{
         console.log(err)
     })  
 })
 function showData(values)
 {
-    const id=values.shift()
+    const id=values.shift();
+    console.log("this is the id",id)
+    
     const tr=document.createElement('tr');
     values.forEach(ele=>{
         const th=document.createElement('th');
@@ -105,7 +150,7 @@ deleteBtn.onclick=()=>{
 async function deleteExpense(id){
     console.log("this is the id ",id)
     const token=localStorage.getItem('token');
-    await axios.post('http://localhost:3000/deleteExpense').then(response=>{
+    await axios.post('http://localhost:3000/deleteExpense',id,{headers: {"Authentication": token }}).then(response=>{
         console.log("response i got",response)
     }).catch(error=>{
         console.log(error)
@@ -160,3 +205,25 @@ primiumBtn.addEventListener('click', async (e) => {
         console.error("Error in goPrimium:", error);
     }
 });
+
+
+function download(){
+    console.log("request for download");
+    axios.get('http://localhost:3000/user/download', { headers: {"Authorization" : token} })
+    .then((response) => {
+        if(response.status === 201){
+            //the bcakend is essentially sending a download link
+            //  which if we open in browser, the file would download
+            var a = document.createElement("a");
+            a.href = response.data.fileUrl;
+            a.download = 'myexpense.csv';
+            a.click();
+        } else {
+            throw new Error(response.data.message)
+        }
+
+    })
+    .catch((err) => {
+        showError(err)
+    });
+}

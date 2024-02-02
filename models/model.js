@@ -54,6 +54,18 @@ exports.Expenses=sequelize.define('Expenses',{
     category:{
         type:DataTypes.STRING,
         allowNull:false
+    },
+    income:{
+        type:DataTypes.DOUBLE,
+        allowNull:true,
+        default:0
+
+    },
+    expense:{
+        type:DataTypes.DOUBLE,
+        allowNull:true,
+        default:0
+
     }
 })
 
