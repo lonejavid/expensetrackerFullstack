@@ -11,5 +11,5 @@ router.get('/goPrimium',userauthentication.authenticate,expense.goPrimium);
 router.post('/updateTaransaction',userauthentication.authenticate,expense.updateTaransaction);
 router.get('/leadersBoard',userauthentication.authenticate,expense.leadersBoard);
 router.post('/deleteExpense',userauthentication.authenticate,expense.deleteExpense);
-router.get('/user/download',userauthentication.authenticate,expense.download);
+router.get('/download',userauthentication.authenticate,expense.download);
 module.exports=router;

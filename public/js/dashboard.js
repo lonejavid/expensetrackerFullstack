@@ -208,14 +208,16 @@ primiumBtn.addEventListener('click', async (e) => {
 
 
 function download(){
-    console.log("request for download");
-    axios.get('http://localhost:3000/user/download', { headers: {"Authorization" : token} })
+    
+    const token=localStorage.getItem('token');
+    console.log("request for download",token);
+    axios.get('http://localhost:3000/download', { headers: { "Authentication": token } })
     .then((response) => {
-        if(response.status === 201){
+        if(response.status === 200){
             //the bcakend is essentially sending a download link
             //  which if we open in browser, the file would download
             var a = document.createElement("a");
-            a.href = response.data.fileUrl;
+            a.href = response.data.fileurl;
             a.download = 'myexpense.csv';
             a.click();
         } else {
@@ -224,6 +226,6 @@ function download(){
 
     })
     .catch((err) => {
-        showError(err)
+        console.log(err)
     });
 }

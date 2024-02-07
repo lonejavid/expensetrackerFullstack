@@ -6,6 +6,8 @@ const config = require('../config')
 const jwt = require('jsonwebtoken');
 const { where } = require('sequelize');
 const sequelize = require('../util/database');
+const UserServices=require('../services/userservices')
+const AWS=require('aws-sdk')
 
 exports.expenses = (req, res) => {
     res.sendFile(path.join(__dirname, '../views/index.html'));
@@ -192,3 +194,52 @@ catch(error){
 
 }
 
+exports.download=async(req,res)=>{
+    try{
+const expenses=await UserServices.getExpenses(req);
+const stringifiedExpense=JSON.stringify(expenses);
+const userEmail=req.user.email;
+const filename=`Expense${userEmail}/${new Date()}.txt`;
+const fileurl=await uploadToS3(stringifiedExpense,filename);
+res.status(200).json({fileurl,success:true});
+    }
+catch(err){
+    console.log(err)
+    return res.status(500).json({fileurl:'',success:false,err:err})
+}
+}
+
+
+function uploadToS3(data,filename){
+    const BUCKET_NAME='expensetrackingapp121';
+    const IAM_USER_KEY='AKIA3FLD2V5NKE5UVV5V';
+    const IAM_USER_SECRET='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';
+    let s3bucket=new AWS.S3({
+        accessKeyId:IAM_USER_KEY,
+        secretAccessKey:IAM_USER_SECRET,
+        //Bucket:BUCKET_NAME
+    })
+
+        var params={
+            Bucket:BUCKET_NAME,
+            Key:filename,
+            Body:data,
+            ACL:'public-read'
+        }
+        return new Promise((resolve,reject)=>{
+            s3bucket.upload(params,(err,s3response)=>{
+                if(err){
+                    console.log("eror occured while uploading the data",err)
+                    reject(err)
+                }
+                else{
+                    console.log("successfully uploaded",s3response);
+                    resolve(s3response.Location);
+                }
+            })
+
+
+        })
+        
+    
+}
