@@ -75,14 +75,31 @@ exports.deleteExpense=async(req,res)=>{
         console.log("error occured while deleting",err)
     })
 }
-exports.getData=async(req,res)=>{
+// exports.getData=async(req,res)=>{
   
-   const data= await model.Expenses.findAll({where:{UserEmail:req.user.email}});
+//    const data= await model.Expenses.findAll({where:{UserEmail:req.user.email}});   
+//     res.send(data)
+// }
+exports.getData = async (req, res) => {
+    const page = req.query.page || 1; // Get the page number from the query parameters or default to 1
+    const pageSize = 2; // Set the number of records per page
 
- // console.log("received data",data)  
-   
-    res.send(data)
-}
+    const offset = (page - 1) * pageSize;
+
+    try {
+        const data = await model.Expenses.findAll({
+            where: { UserEmail: req.user.email },
+            offset,
+            limit: pageSize,
+        });
+
+        res.send(data);
+    } catch (error) {
+        console.log("Error fetching data", error);
+        res.status(500).send("Internal Server Error");
+    }
+};
+
 
 
 
@@ -144,8 +161,6 @@ exports.leadersBoard=async(req,res)=>{
         
     })
    
-    console.log("received data",laderboardOfusers)
-   
     return res.status(200).json(laderboardOfusers);
 }
 
@@ -154,7 +169,6 @@ exports.leadersBoard=async(req,res)=>{
 exports.addExpense=async(req,res)=>{
 
     const data=req.body;
-    console.log("the data received is ",data)
     const email=req.user.email
     data.UserEmail=req.user.email
     // console.log(data)
@@ -166,13 +180,12 @@ try{
         attributes:['totalExpense'],
          })
          var newExpenseAmount=Number(expense.amount)+Number(alreadySpend.get('totalExpense'));
-         console.log("this is now the total",newExpenseAmount)
+
          await model.User.update({totalExpense:newExpenseAmount},{
         where:{email:email},
         transaction:t
     }).then(async()=>{
         t.commit();
-        console.log("data that you entered ",expense)
         return res.status(200).json({expense})
         
 

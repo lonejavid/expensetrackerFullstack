@@ -39,46 +39,128 @@ function leadersBoard(){
     })
 }
 const myform=document.getElementById('expenses-form');
-window.onload=()=>{
-    const token=localStorage.getItem('token');
-    const decodedToken=parseJwt(token);
-    console.log("decoded token is",decodedToken)
-    if(decodedToken.isprimium){
-       primiumUser();
-    }
-    else{
+// window.onload=()=>{
+//     const token=localStorage.getItem('token');
+//     const decodedToken=parseJwt(token);
+//     console.log("decoded token is",decodedToken)
+//     if(decodedToken.isprimium){
+//        primiumUser();
+//     }
+//     else{
 
-    }
-    axios.get('http://localhost:3000/getData',{headers:{"Authentication":token}}).then(result=>{
-        const reords=result.data;
+//     }
+//     axios.get('http://localhost:3000/getData',{headers:{"Authentication":token}}).then(result=>{
+//         const reords=result.data;
        
-        reords.forEach(rec=>{
-            const { id,createdAt, description, category, income, expense } = rec;
-            let formattedCreatedAt;
-            if (createdAt instanceof Date) {
-                formattedCreatedAt = createdAt.toISOString().slice(0, 10);
-            } else {
-                formattedCreatedAt = new Date(createdAt).toISOString().slice(0, 10);
-            }
+//         reords.forEach(rec=>{
+//             const { id,createdAt, description, category, income, expense } = rec;
+//             let formattedCreatedAt;
+//             if (createdAt instanceof Date) {
+//                 formattedCreatedAt = createdAt.toISOString().slice(0, 10);
+//             } else {
+//                 formattedCreatedAt = new Date(createdAt).toISOString().slice(0, 10);
+//             }
             
-            const dataValues = {
-                id:id,
-                createdAt: formattedCreatedAt,
-                description,
-                category,
-                income,
-                expense
-            };
+//             const dataValues = {
+//                 id:id,
+//                 createdAt: formattedCreatedAt,
+//                 description,
+//                 category,
+//                 income,
+//                 expense
+//             };
             
-            const values = Object.values(dataValues);
-            showData(values);
+//             const values = Object.values(dataValues);
+//             showData(values);
              
 
-        })
-    }).catch(error=>{
-        console.log("error in loading the data",error)
-    })
-}
+//         })
+//     }).catch(error=>{
+//         console.log("error in loading the data",error)
+//     })
+// }
+window.onload = () => {
+    const token = localStorage.getItem('token');
+    const decodedToken = parseJwt(token);
+    console.log("decoded token is", decodedToken);
+
+    if (decodedToken.isprimium) {
+        primiumUser();
+    } else {
+        // Handle non-premium user case
+    }
+
+    let currentPage = 1;
+
+    const fetchData = async (page) => {
+        try {
+            const result = await axios.get(`http://localhost:3000/getData?page=${page}`, {
+                headers: { "Authentication": token }
+            });
+
+            const records = result.data;
+
+            records.forEach((rec) => {
+                const { id, createdAt, description, category, income, expense } = rec;
+                let formattedCreatedAt;
+                if (createdAt instanceof Date) {
+                    formattedCreatedAt = createdAt.toISOString().slice(0, 10);
+                } else {
+                    formattedCreatedAt = new Date(createdAt).toISOString().slice(0, 10);
+                }
+
+                const dataValues = {
+                    id: id,
+                    createdAt: formattedCreatedAt,
+                    description,
+                    category,
+                    income,
+                    expense
+                };
+
+                const values = Object.values(dataValues);
+                showData(values);
+            });
+        } catch (error) {
+            console.log("Error in loading the data", error);
+        }
+    };
+
+    window.nextPage = () => {
+        currentPage++;
+        fetchData(currentPage);
+    };
+
+    window.prevPage = () => {
+        if (currentPage > 1) {
+            currentPage--;
+            fetchData(currentPage);
+        }
+    };
+
+    window.goToPage = (page) => {
+        if (page > 0) {
+            currentPage = page;
+            fetchData(currentPage);
+        }
+    };
+
+    const paginationContainer = document.getElementById('pagination-container');
+
+    const updatePaginationUI = () => {
+        // You can customize this section based on your UI design
+        paginationContainer.innerHTML = `
+            <button onclick="prevPage()">Previous</button>
+            <span>Page ${currentPage}</span>
+            <button onclick="nextPage()">Next</button>
+        `;
+    };
+
+    updatePaginationUI();
+    fetchData(currentPage);
+};
+
+
 const expenseTable=document.getElementById('tb')
 myform.addEventListener('submit',(e)=>{
     e.preventDefault();
