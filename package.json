@@ -20,6 +20,9 @@
   "name": "expense-tracker---node.js-project",
   "version": "1.0.0",
   "main": "app.js",
+  "engines": {
+    "node":"18.17.1"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon app.js"
