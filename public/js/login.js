@@ -1,5 +1,5 @@
-function handlelogin()
-{
+  const loginBtn=document.getElementById('login');
+  loginBtn.addEventListener('click', async (e) => {
    const emailInput=document.getElementById('input-box1').value;
    const passedInput=document.getElementById('input-box2').value;
    const loginDetails={email:emailInput,password:passedInput}
@@ -7,9 +7,8 @@ function handlelogin()
     if(responce.status===200)
     {
         alert(responce.data.message);
-        console.log("check access token",responce.data.token)
         localStorage.setItem('token',responce.data.token);
         window.location.href='dashboard.html';
    }
   })  
-}
+})

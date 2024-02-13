@@ -114,7 +114,7 @@
         <button type="input" id="rzp-primum">Go Primium</button>
         <div id="msg">
             <p id="msg1"></p>
-            <button onclick="download()" id="downloadexpense"  style="margin-bottom: 5px;">Download File</button>
+            <button id="downloadexpense"  style="margin-bottom: 5px;">Download File</button>
         </div>
         <div id="leaderBtn">
            
@@ -155,19 +155,31 @@
             </tr>
         </table>
         <div id="pagination-container">
+         
         </div>
+        <select id="rows-per-page-select" style="margin-top: 5px;">
+            <option value="1" selected>1 Rows Per Page</option>
+            <option value="3">3 Rows Per Page</option>
+            <option value="5">5 Rows Per Page</option>
+            <!-- Add more options as needed -->
+        </select>
+        
+    <button id="list-of-downloaded-files">List of downloaded files</button>
+      <ul id="downloadedFiles">
+        </ul>
      </div>
    
      <div id="leader" class="expenses-table">
     </div>
     <div id="leadersBoard" class="leadersDiv">
         <h3>Leaders Board</h3>
-        <button onclick="download()" id="downloadexpense">Download File</button>
+        <button  id="downloadexpense">Download File</button>
         <ul id="list"></ul>
     </div>
     
         
     
     <script src="/js/dashboard.js"></script>
+    <script src="/js/downloadFilesFrontEnd.js"></script>
 </body>
 </html>

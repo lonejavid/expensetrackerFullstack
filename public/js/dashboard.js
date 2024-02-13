@@ -72,8 +72,6 @@ const myform=document.getElementById('expenses-form');
             
 //             const values = Object.values(dataValues);
 //             showData(values);
-             
-
 //         })
 //     }).catch(error=>{
 //         console.log("error in loading the data",error)
@@ -82,8 +80,6 @@ const myform=document.getElementById('expenses-form');
 window.onload = () => {
     const token = localStorage.getItem('token');
     const decodedToken = parseJwt(token);
-    console.log("decoded token is", decodedToken);
-
     if (decodedToken.isprimium) {
         primiumUser();
     } else {
@@ -91,15 +87,15 @@ window.onload = () => {
     }
 
     let currentPage = 1;
+    let rowsPerPage = 1; // Default number of rows per page
 
     const fetchData = async (page) => {
         try {
-            const result = await axios.get(`http://localhost:3000/getData?page=${page}`, {
+            const result = await axios.get(`http://localhost:3000/getData?page=${page}&limit=${rowsPerPage}`, {
                 headers: { "Authentication": token }
             });
 
             const records = result.data;
-
             records.forEach((rec) => {
                 const { id, createdAt, description, category, income, expense } = rec;
                 let formattedCreatedAt;
@@ -129,12 +125,14 @@ window.onload = () => {
     window.nextPage = () => {
         currentPage++;
         fetchData(currentPage);
+        updatePaginationUI();
     };
 
     window.prevPage = () => {
         if (currentPage > 1) {
             currentPage--;
             fetchData(currentPage);
+            updatePaginationUI();
         }
     };
 
@@ -142,20 +140,31 @@ window.onload = () => {
         if (page > 0) {
             currentPage = page;
             fetchData(currentPage);
+            updatePaginationUI();
         }
     };
 
+    const updateRowsPerPage = (newRowsPerPage) => {
+        rowsPerPage = newRowsPerPage;
+        currentPage = 1; // Reset current page when rows per page is changed
+        fetchData(currentPage);
+        updatePaginationUI();
+    };
+
     const paginationContainer = document.getElementById('pagination-container');
+    const rowsPerPageSelect = document.getElementById('rows-per-page-select');
 
     const updatePaginationUI = () => {
-        // You can customize this section based on your UI design
         paginationContainer.innerHTML = `
             <button onclick="prevPage()">Previous</button>
             <span>Page ${currentPage}</span>
             <button onclick="nextPage()">Next</button>
         `;
     };
-
+    // Add an event listener to the rows per page select input
+    rowsPerPageSelect.addEventListener('change', (event) => {
+        updateRowsPerPage(parseInt(event.target.value));
+    });
     updatePaginationUI();
     fetchData(currentPage);
 };
@@ -289,8 +298,10 @@ primiumBtn.addEventListener('click', async (e) => {
 });
 
 
-function download(){
-    
+
+
+const downloadBtn=document.getElementById('downloadexpense');
+downloadBtn.addEventListener('click',async()=>{
     const token=localStorage.getItem('token');
     console.log("request for download",token);
     axios.get('http://localhost:3000/download', { headers: { "Authentication": token } })
@@ -310,4 +321,8 @@ function download(){
     .catch((err) => {
         console.log(err)
     });
-}
+})
+
+
+
+   

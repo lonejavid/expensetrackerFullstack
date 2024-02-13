@@ -8,6 +8,8 @@ const { where } = require('sequelize');
 const sequelize = require('../util/database');
 const UserServices=require('../services/userservices')
 const AWS=require('aws-sdk')
+const downloadedFiles=require('../models/downloadedFiles');
+const DownloadedFiles = require('../models/downloadedFiles');
 
 exports.expenses = (req, res) => {
     res.sendFile(path.join(__dirname, '../views/index.html'));
@@ -81,8 +83,9 @@ exports.deleteExpense=async(req,res)=>{
 //     res.send(data)
 // }
 exports.getData = async (req, res) => {
-    const page = req.query.page || 1; // Get the page number from the query parameters or default to 1
-    const pageSize = 2; // Set the number of records per page
+    const page = parseInt(req.query.page) || 1;
+
+    const pageSize = parseInt(req.query.limit) ;
 
     const offset = (page - 1) * pageSize;
 
@@ -105,13 +108,14 @@ exports.getData = async (req, res) => {
 
 exports.goPrimium = async (req, res) => {
     try {
+        console.log("testing the code ")
         // Set Razorpay keys
-        process.env.RAZORPAY_KEY_ID = 'rzp_test_MFnfb5FdE00Awm';
-        process.env.RAZORPAY_KEY_SECRET = '2A8i7h8YYpYzdzSxL4c9uSNl';
+        const RAZORPAY_KEY_ID = 'rzp_test_GAKPWtu92gPjpM';
+        const RAZORPAY_KEY_SECRET = '2A6ZKzJtVwKIkz8XLUhmjxGd';
         // Create a new Razorpay instance
         const rzp = new Razorpay({
-            key_id: process.env.RAZORPAY_KEY_ID,
-            key_secret: process.env.RAZORPAY_KEY_SECRET
+            key_id: RAZORPAY_KEY_ID,
+            key_secret:RAZORPAY_KEY_SECRET
         });
         const amount = 25000;
         rzp.orders.create({ amount, currency: "INR" }, (err, order) => {
@@ -133,7 +137,6 @@ exports.goPrimium = async (req, res) => {
         return res.status(500).json({ error: "Unexpected error" });
     }
 };
-
 exports.updateTaransaction = async (req, res) => {
     try {
         const { payment_id, order_id,email } = req.body;
@@ -163,9 +166,6 @@ exports.leadersBoard=async(req,res)=>{
    
     return res.status(200).json(laderboardOfusers);
 }
-
-
-
 exports.addExpense=async(req,res)=>{
 
     const data=req.body;
@@ -213,7 +213,7 @@ const expenses=await UserServices.getExpenses(req);
 const stringifiedExpense=JSON.stringify(expenses);
 const userEmail=req.user.email;
 const filename=`Expense${userEmail}/${new Date()}.txt`;
-const fileurl=await uploadToS3(stringifiedExpense,filename);
+const fileurl=await uploadToS3(stringifiedExpense,filename,userEmail);
 res.status(200).json({fileurl,success:true});
     }
 catch(err){
@@ -223,18 +223,13 @@ catch(err){
 }
 
 
-function uploadToS3(data,filename){
-    const BUCKET_NAME='expensetrackingapp121';
-    const IAM_USER_KEY='AKIA3FLD2V5NKE5UVV5V';
-    const IAM_USER_SECRET='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';
+function uploadToS3(data,filename,userEmail){
     let s3bucket=new AWS.S3({
-        accessKeyId:IAM_USER_KEY,
-        secretAccessKey:IAM_USER_SECRET,
-        //Bucket:BUCKET_NAME
+        accessKeyId:process.env.IAM_USER_KEY,
+        secretAccessKey:process.env.IAM_USER_SECRET,
     })
-
         var params={
-            Bucket:BUCKET_NAME,
+            Bucket:'expensetracker131',
             Key:filename,
             Body:data,
             ACL:'public-read'
@@ -246,13 +241,31 @@ function uploadToS3(data,filename){
                     reject(err)
                 }
                 else{
-                    console.log("successfully uploaded",s3response);
+                    const downloadedInfo={
+                        filelocation:s3response.Location,
+                        UserEmail:userEmail
+
+                    }
+                    downloadedFiles.create(downloadedInfo)
+                   // console.log("successfully uploaded",s3response.Location);
                     resolve(s3response.Location);
                 }
             })
+        })    
+}
 
+
+exports.allFiles=async (req,res)=>{
+    try{
+        const fileLocs=await downloadedFiles.findAll({
+            attributes:['filelocation']
 
         })
-        
-    
+        res.status(200).json({fileLocs});
+
+    }
+    catch(err){
+        console.log("error occured while loading the files from the database")
+
+    }
 }

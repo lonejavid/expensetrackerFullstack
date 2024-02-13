@@ -12,4 +12,5 @@ router.post('/updateTaransaction',userauthentication.authenticate,expense.update
 router.get('/leadersBoard',userauthentication.authenticate,expense.leadersBoard);
 router.post('/deleteExpense',userauthentication.authenticate,expense.deleteExpense);
 router.get('/download',userauthentication.authenticate,expense.download);
+router.get('/allFiles',userauthentication.authenticate,expense.allFiles)
 module.exports=router;
